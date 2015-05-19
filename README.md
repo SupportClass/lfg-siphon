@@ -1,7 +1,7 @@
 #lfg-siphon
 This is a [NodeCG](http://github.com/nodecg/nodecg) bundle.
 
-This bundle is an interface to [Streen](https://github.com/SupportClass/streen), an IPC wrapper for twitch-irc. 
+This bundle is an interface to [Streen](https://github.com/SupportClass/streen), an IPC wrapper for [twitch-irc](https://github.com/twitch-irc/twitch-irc). 
 Together, Streen and lfg-siphon enable one single twitch-irc instance to power multiple NodeCG instances.
 
 ## Installation
