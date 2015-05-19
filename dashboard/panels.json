@@ -1,0 +1,9 @@
+[
+  {
+    "name": "subscriptions",
+    "title": "Subscriptions",
+    "width": 2,
+    "file": "panel.jade",
+    "faIcon": "fa-twitch"
+  }
+]

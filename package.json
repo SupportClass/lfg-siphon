@@ -1,0 +1,6 @@
+{
+  "name": "lfg-siphon",
+  "dependencies": {
+    "node-ipc": "^1.1.13"
+  }
+}

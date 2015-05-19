@@ -1,0 +1,11 @@
+.lfg-siphon .template { display: none; }
+.lfg-siphon .sub {
+  padding: 4px 35px 4px 6px;
+  margin-bottom: 2px;
+  overflow-wrap: break-word;
+}
+#lfg-siphon_list {
+  max-height: 250px;
+  overflow-y: scroll;
+  margin-bottom: 4px;
+}
