@@ -48,4 +48,6 @@ module.exports = function(nodecg) {
             nodecg.log.info('Property "chat" in config is "false", ignoring chat');
         }
     });
+
+    return emitter;
 };
