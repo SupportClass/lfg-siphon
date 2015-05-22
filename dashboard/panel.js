@@ -2,7 +2,7 @@
 
 nodecg.listenFor('subscription', function (data) {
     var alert = $('.template.sub').clone().removeClass('template').css('display', 'block');
-    alert.find('.name').html(data.username);
+    alert.find('.name').html(data.name);
     if (data.resub) {
         alert.removeClass('alert-info');
         alert.addClass('bg-primary');
