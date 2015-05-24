@@ -13,7 +13,7 @@ module.exports = function(nodecg) {
         throw new Error('[lfg-siphon] No config found in cfg/lfg-siphon.json, aborting!');
     }
 
-    var emitter  = new EventEmitter();
+    var self = new EventEmitter();
     var channels = nodecg.bundleConfig.channels;
     var connectFn = os.platform() === 'win32' ? ipc.connectToNet : ipc.connectTo;
     connectFn('streen', function () {
@@ -35,19 +35,27 @@ module.exports = function(nodecg) {
             if (channels.indexOf(data.channel) < 0) return;
             if (equal(lastSub, data)) return;
             lastSub = data;
-            emitter.emit('subscription', data);
+            self.emit('subscription', data);
             nodecg.sendMessage('subscription', data);
         });
 
         if (nodecg.bundleConfig.chat) {
             ipc.of.streen.on('chat', function (data) {
                 if (channels.indexOf(data.channel) < 0) return;
-                emitter.emit('chat', data.channel, data.user, data.message);
+                self.emit('chat', data.channel, data.user, data.message);
             });
         } else {
             nodecg.log.info('Property "chat" in config is "false", ignoring chat');
         }
     });
 
-    return emitter;
+    self.timeout = function(channel, username, seconds) {
+        ipc.of.streen.emit('timeout', {
+            channel: channel,
+            username: username,
+            seconds: seconds
+        });
+    };
+
+    return self;
 };
