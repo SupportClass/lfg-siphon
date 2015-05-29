@@ -43,6 +43,7 @@ module.exports = function(nodecg) {
             ipc.of.streen.on('chat', function (data) {
                 if (channels.indexOf(data.channel) < 0) return;
                 self.emit('chat', data.channel, data.user, data.message);
+                nodecg.sendMessage('chat', data);
             });
         } else {
             nodecg.log.info('Property "chat" in config is "false", ignoring chat');
