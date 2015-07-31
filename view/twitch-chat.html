@@ -97,7 +97,6 @@
         },
         insert: function (nick, special, message, color, emotes) {
             var newLine = new TwitchChatMessage(nick, special, message, color, emotes, this.bttvEmotes);
-            console.log('newLine', newLine);
             this.queue.push(newLine);
         },
         loadEmotes: function (callback) {
@@ -171,6 +170,11 @@
                     var frag = document.createDocumentFragment();
                     self.queue.forEach(function(item) {
                         frag.appendChild(item);
+
+                        if(self.animate) {
+                            console.log('playing animation');
+                            item.playAnimation('entry');
+                        }
                     });
                     rootDom.appendChild(frag);
                     Polymer.dom.flush();

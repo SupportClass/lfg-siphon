@@ -1,6 +1,8 @@
 <!-- Load Polymer core -->
 <link rel="import" href="/components/polymer/polymer.html">
 <link rel="import" href="/components/neon-animation/neon-animation-runner-behavior.html">
+<link rel="import" href="/components/neon-animation/animations/transform-animation.html">
+<link rel="import" href="/components/neon-animation/animations/fade-in-animation.html">
 
 <!-- Define element -->
 <dom-module id="twitch-chat-message">
@@ -125,17 +127,42 @@
     window.TwitchChatMessage = Polymer({
         is: 'twitch-chat-message',
 
+        behaviors: [
+            Polymer.NeonAnimationRunnerBehavior
+        ],
+
         properties: {
             emotesize: {
                 type: String,
                 value: 'small',
                 reflectToAttribute: true
+            },
+            animationConfig: {
+                value: function() {
+                    return {
+                        // fade-in-animation is run with a 50ms delay from slide-from-left-animation
+                        'entry': [{
+                            name: 'transform-animation',
+                            node: this,
+                            transformFrom: 'translateX(-15px)',
+                            transformTo: 'none',
+                            timing: {
+                                duration: 400,
+                                ease: 'ease-out'
+                            }
+                        },{
+                            name: 'fade-in-animation',
+                            node: this,
+                            timing: {
+                                delay: 50,
+                                duration: 300,
+                                ease: 'ease-in-out'
+                            }
+                        }]
+                    }
+                }
             }
         },
-
-        behaviors: [
-            Polymer.NeonAnimationRunnerBehavior
-        ],
 
         factoryImpl: function (nick, special, message, color, emotes, emoteData) {
             // TODO: Dumb hack, should be cleaned up
