@@ -229,9 +229,10 @@
             return message.replace(/</g, '&lt;').replace(/>/g, '&gt;');
         },
         bttvEmoteTemplate: function (id) {
+            var url = '//cdn.betterttv.net/emote/{{id}}/{{image}}';
             return '<img class="emoticon bttv-emo-' + id
-                    + '" src="' + this.bttvEmoteTemplate.replace('{{id}}', id).replace('{{image}}', '1x')
-                    + '" srcset="' + this.bttvEmoteTemplate.replace('{{id}}', id).replace('{{image}}', '2x') + ' 2x"'
+                    + '" src="' + url.replace('{{id}}', id).replace('{{image}}', '1x')
+                    + '" srcset="' + url.replace('{{id}}', id).replace('{{image}}', '2x') + ' 2x"'
                     + ' />';
         },
         emoteTemplate: function (id) {
@@ -281,8 +282,6 @@
             message = punycode.ucs2.decode(message);
 
             replacements.forEach(function (replacement) {
-                console.log(self.emoteTemplate(replacement.id));
-
                 // Unshift the end of the message (that doesn't contain the emote)
                 tokenizedMessage.unshift(punycode.ucs2.encode(message.slice(replacement.last + 1)));
 
