@@ -1,9 +1,38 @@
 <!-- Load Polymer core -->
 <link rel="import" href="/components/polymer/polymer.html">
+<link rel="import" href="./twitch-chat-message.html">
 
 <!-- Define element -->
 <dom-module id="twitch-chat">
-    <link rel="import" type="css" href="twitch-chat.css">
+    <style>
+        :host {
+            display: block;
+            width: 100%;
+            height: 100%;
+            padding: 0.375em;
+            overflow: hidden;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-style: normal;
+            font-weight: normal;
+            color: #D3D3D3;
+            background-color: transparent;
+            border-radius: 0.250em;
+            font-variant: normal;
+        }
+
+        :host.dark {
+            color: #fff;
+            background: rgba(0,0,0,0.3);
+        }
+
+        :host.light {
+            color: #000;
+            background: rgba(255,255,255,0.3);
+        }
+
+    </style>
+
     <template></template>
 </dom-module>
 
@@ -49,6 +78,10 @@
                 type: String,
                 value: 'small',
                 reflectToAttribute: true
+            },
+            animate: {
+                type: Boolean,
+                value: false
             }
         },
 
@@ -62,169 +95,9 @@
                 rootDom.removeChild(rootDom.firstChild);
             }
         },
-        escape: function (message) {
-            return message.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        },
-        bttvEmoteTemplate: function (id) {
-            return '<img class="emoticon bttv-emo-' + id
-                    + '" src="' + this.bttvEmoteTemplate.replace('{{id}}', id).replace('{{image}}', '1x')
-                    + '" srcset="' + this.bttvEmoteTemplate.replace('{{id}}', id).replace('{{image}}', '2x') + ' 2x"'
-                    + ' />';
-        },
-        emoteTemplate: function (id) {
-            var template;
-            switch (this.emotesize) {
-                case 'small':
-                    template = '<img class="emoticon ttv-emo-' + id + '" src="//static-cdn.jtvnw.net/emoticons/v1/'
-                            + id + '/1.0" srcset="//static-cdn.jtvnw.net/emoticons/v1/' + id + '/2.0 2x" />';
-                    break;
-                case 'medium':
-                    template = '<img class="emoticon ttv-emo-' + id + '" src="//static-cdn.jtvnw.net/emoticons/v1/'
-                            + id + '/2.0" srcset="//static-cdn.jtvnw.net/emoticons/v1/' + id + '/3.0 2x" />';
-                    break;
-                case 'large':
-                    template = '<img class="emoticon ttv-emo-' + id + '" src="//static-cdn.jtvnw.net/emoticons/v1/'
-                            + id + '/3.0" />';
-                    break;
-            }
-            return template;
-        },
-        emoticonize: function (message, emotes) {
-            if (!emotes) return [message];
-
-            var self = this;
-            var tokenizedMessage = [];
-            var emotesList = Object.keys(emotes);
-            var replacements = [];
-
-            emotesList.forEach(function (id) {
-                var uses = emotes[id];
-
-                for (var i = uses.length - 1; i >= 0; i--) {
-                    var numbers = uses[i].split('-');
-                    replacements.push({id: id, first: Number(numbers[0]), last: Number(numbers[1])});
-                }
-            });
-
-            replacements.sort(function (a, b) {
-                return b.first - a.first;
-            });
-
-            // Tokenizes each character into an array
-            // punycode deals with unicode symbols on surrogate pairs
-            // punycode is used in the replacements loop below as well
-            message = punycode.ucs2.decode(message);
-
-            replacements.forEach(function (replacement) {
-                // Unshift the end of the message (that doesn't contain the emote)
-                tokenizedMessage.unshift(punycode.ucs2.encode(message.slice(replacement.last + 1)));
-
-                // Unshift the emote HTML (but not as a string to allow us to process links and escape html still)
-                tokenizedMessage.unshift([self.emoteTemplate(replacement.id)]);
-
-                // Splice the unparsed piece of the message
-                message = message.slice(0, replacement.first);
-            });
-
-            // Unshift the remaining part of the message (that contains no emotes)
-            tokenizedMessage.unshift(punycode.ucs2.encode(message));
-
-            return tokenizedMessage;
-        },
-        bttvEmoticonize: function (message, emote) {
-            if (emote.restrictions) {
-                if (emote.restrictions.channels && emote.restrictions.channels.length
-                        && emote.restrictions.channels.indexOf(this.channel) === -1) return message;
-
-                if (emote.restrictions.games && emote.restrictions.games.length) return message;
-            }
-
-            return message.replace(emote.code, this.bttvEmoteTemplate(emote.id));
-        },
-        bttvMessageTokenize: function (message) {
-            var tokenizedString = message.split(' ');
-
-            for (var i = 0; i < tokenizedString.length; i++) {
-                var piece = tokenizedString[i];
-
-                var test = piece.replace(/(^[~!@#$%\^&\*\(\)]+|[~!@#$%\^&\*\(\)]+$)/g, '');
-                var emote = this.bttvEmotes[test] || this.bttvEmotes[piece];
-
-                if (emote) {
-                    piece = this.bttvEmoticonize(piece, emote);
-                } else {
-                    piece = this.escape(piece);
-                }
-
-                tokenizedString[i] = piece;
-            }
-
-            return tokenizedString.join(' ');
-        },
         insert: function (nick, special, message, color, emotes) {
-            nick = nick || 'Chat';
-            special = special || [];
-            message = message || '';
-            color = color || '';
-
-            // Create chat line element
-            var newLine = document.createElement('div');
-            newLine.classList.add('chat-line');
-            newLine.setAttribute('data-nick', nick);
-            newLine.setAttribute('data-timestamp', Date.now());
-
-            // Create any special mod/brodcaster/sub icons to display before the username
-            var badges = document.createElement('span');
-            badges.classList.add('badges');
-            special.forEach(function (status) {
-                if (status === 'mod' && special.indexOf('broadcaster') >= 0) return;
-                var badge = document.createElement('span');
-                badge.classList.add('badge', status);
-                badge.innerHTML = '&nbsp;';
-                badges.appendChild(badge);
-            });
-            newLine.appendChild(badges);
-
-            // Do some bullshit that I'm probably going to delete
-            var colorRegex = /^#[0-9a-f]+$/i;
-            if (this.customClass !== 'clear' && colorRegex.test(color)) {
-                while (calculateColorBackground(color) !== this.customClass) {
-                    color = calculateColorReplacement(color, calculateColorBackground(color));
-                }
-            }
-
-            // Create the username element
-            var formattedUser = document.createElement('span');
-            formattedUser.classList.add('nick');
-            formattedUser.style.color = color;
-            formattedUser.innerHTML = nick;
-            newLine.appendChild(formattedUser);
-
-            // Make an element just for the semicolon that appears after the name
-            var semicolon = document.createElement('span');
-            semicolon.classList.add('semicolon');
-            semicolon.innerHTML = ': ';
-            newLine.appendChild(semicolon);
-
-            // Create the message content element
-            var formattedMessage = document.createElement('span');
-            formattedMessage.classList.add('message');
-
-            var tokenizedMessage = this.emoticonize(message, emotes);
-
-            for (var i = 0; i < tokenizedMessage.length; i++) {
-                if (typeof tokenizedMessage[i] === 'string') {
-                    tokenizedMessage[i] = this.bttvMessageTokenize(tokenizedMessage[i]);
-                } else {
-                    tokenizedMessage[i] = tokenizedMessage[i][0];
-                }
-            }
-
-            message = tokenizedMessage.join(' ');
-
-            formattedMessage.innerHTML = message;
-            newLine.appendChild(formattedMessage);
-
+            var newLine = new TwitchChatMessage(nick, special, message, color, emotes, this.bttvEmotes);
+            console.log('newLine', newLine);
             this.queue.push(newLine);
         },
         loadEmotes: function (callback) {
@@ -234,6 +107,8 @@
                     data.emotes.forEach(function (emote) {
                         self.bttvEmotes[emote.code] = emote;
                     });
+
+                    // TODO: This never gets passed to the TwitchChatMessage elements!
                     self.bttvEmoteTemplate = data.urlTemplate;
                 });
             $.getJSON('https://api.betterttv.net/2/channels/' + encodeURIComponent(self.channel))
@@ -345,51 +220,6 @@
             });
         }
     });
-
-    function calculateColorBackground(color) {
-        // Converts HEX to YIQ to judge what color background the color would look best on
-        color = String(color).replace(/[^0-9a-f]/gi, '');
-        if (color.length < 6) {
-            color = color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
-        }
-
-        var r = parseInt(color.substr(0, 2), 16);
-        var g = parseInt(color.substr(2, 2), 16);
-        var b = parseInt(color.substr(4, 2), 16);
-        var yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-        return (yiq >= 128) ? 'dark' : 'light';
-    }
-
-    function calculateColorReplacement(color, background) {
-        // Modified from http://www.sitepoint.com/javascript-generate-lighter-darker-color/
-        var inputColor = color,
-                rgb = '#',
-                brightness, c, i;
-
-        color = String(color).replace(/[^0-9a-f]/gi, '');
-        if (color.length < 6) {
-            color = color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
-        }
-
-        brightness = background === 'light' ? '0.2' : '-0.5';
-
-        for (i = 0; i < 3; i++) {
-            c = parseInt(color.substr(i * 2, 2), 16);
-            if (c < 10) c = 10;
-            c = Math.round(Math.min(Math.max(0, c + (c * brightness)), 255)).toString(16);
-            rgb += ('00' + c).substr(c.length);
-        }
-
-        if (inputColor === rgb) {
-            if (background === 'light') {
-                return '#ffffff';
-            } else {
-                return '#000000';
-            }
-        } else {
-            return rgb;
-        }
-    }
 </script>
 
 <script src="components/jquery/dist/jquery.min.js"></script>

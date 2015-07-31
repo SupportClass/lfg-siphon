@@ -1,0 +1,305 @@
+<!-- Load Polymer core -->
+<link rel="import" href="/components/polymer/polymer.html">
+<link rel="import" href="/components/neon-animation/neon-animation-runner-behavior.html">
+
+<!-- Define element -->
+<dom-module id="twitch-chat-message">
+    <style>
+        :host {
+            display: block;
+            margin-right: 0.188em;
+            margin-left: 0.188em;
+            padding-top: 0.1em;
+            padding-bottom: 0.1em;
+            line-height: 1.6em;
+            align-items: center;
+        }
+
+        :host * {
+            vertical-align: middle;
+        }
+
+        .badges {
+            display: inline-flex;
+        }
+
+        .badge {
+            display: inline-block;
+            height: 1.125em;
+            min-width: 1.125em;
+            padding: 0;
+            margin-right: 0.188em;
+            margin-bottom: 0.063em;
+            overflow: hidden;
+            vertical-align: bottom;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: contain;
+            -webkit-border-radius: 0.125em;
+            -moz-border-radius: 0.125em;
+            border-radius: 0.125em;
+        }
+
+        .broadcaster {
+            background-color: #e71818;
+            background-image: url(//www-cdn.jtvnw.net/images/xarth/badge_broadcaster.svg);
+            background-size: 100%;
+            order: 0;
+        }
+
+        .staff {
+            background-color: #200f33;
+            background-image: url(//www-cdn.jtvnw.net/images/xarth/badge_staff.svg);
+            background-size: 100%;
+            order: 1;
+        }
+
+        .admin {
+            background-color: #faaf19;
+            background-image: url(//www-cdn.jtvnw.net/images/xarth/badge_admin.svg);
+            background-size: 100%;
+            order: 2;
+        }
+
+        .global_mod {
+            background-color: #0C6F20;
+            background-image: url(//www-cdn.jtvnw.net/images/xarth/badge_globalmod.svg);
+            background-size: 100%;
+            order: 3;
+        }
+
+        .mod {
+            background-color: #34ae0a;
+            background-image: url(//www-cdn.jtvnw.net/images/xarth/badge_mod.svg);
+            background-size: 100%;
+            order: 4;
+        }
+
+        .turbo {
+            background-color: #6441a5;
+            background-image: url(//www-cdn.jtvnw.net/images/xarth/badge_turbo.svg);
+            background-size: 100%;
+            order: 5;
+        }
+
+        .subscriber {
+            order: 6;
+        }
+
+        .nick {
+            font-size: 0.813em;
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+
+        .message {
+            font-size: 0.813em;
+            word-wrap: break-word;
+            align-items: center;
+        }
+
+        .semicolon {
+            font-size: 0.813em;
+            margin-right: 0.2em;
+        }
+
+        .deleted {
+            font-size: 0.813em;
+        }
+
+        .emoticon {
+            height: 1.8em;
+            margin-top: -0.1em;
+            margin-bottom: -0.1em;
+        }
+    </style>
+
+    <template></template>
+</dom-module>
+
+<script>
+    // TODO: Remove jQuery Dependency
+    // TODO: Consider removing BTTV emote support
+    // TODO: Make name color based on element background work
+
+    window.TwitchChatMessage = Polymer({
+        is: 'twitch-chat-message',
+
+        properties: {
+            emotesize: {
+                type: String,
+                value: 'small',
+                reflectToAttribute: true
+            }
+        },
+
+        behaviors: [
+            Polymer.NeonAnimationRunnerBehavior
+        ],
+
+        factoryImpl: function (nick, special, message, color, emotes, emoteData) {
+            // TODO: Dumb hack, should be cleaned up
+            this.bttvEmotes = emoteData;
+
+            nick = nick || 'Chat';
+            special = special || [];
+            message = message || '';
+            color = color || '';
+
+            // Create chat line element
+            Polymer.dom(this).setAttribute('data-nick', nick);
+            Polymer.dom(this).setAttribute('data-timestamp', Date.now());
+
+            // Create any special mod/brodcaster/sub icons to display before the username
+            var badges = document.createElement('span');
+            badges.classList.add('badges');
+            special.forEach(function (status) {
+                if (status === 'mod' && special.indexOf('broadcaster') >= 0) return;
+                var badge = document.createElement('span');
+                badge.classList.add('badge', status);
+                badge.innerHTML = '&nbsp;';
+                badges.appendChild(badge);
+            });
+            Polymer.dom(this.root).appendChild(badges);
+
+            // Create the username element
+            var formattedUser = document.createElement('span');
+            formattedUser.classList.add('nick');
+            formattedUser.style.color = color;
+            formattedUser.innerHTML = nick;
+            Polymer.dom(this.root).appendChild(formattedUser);
+
+            // Make an element just for the semicolon that appears after the name
+            var semicolon = document.createElement('span');
+            semicolon.classList.add('semicolon');
+            semicolon.innerHTML = ': ';
+            Polymer.dom(this.root).appendChild(semicolon);
+
+            // Create the message content element
+            var formattedMessage = document.createElement('span');
+            formattedMessage.classList.add('message');
+
+            var tokenizedMessage = this.emoticonize(message, emotes);
+
+            for (var i = 0; i < tokenizedMessage.length; i++) {
+                if (typeof tokenizedMessage[i] === 'string') {
+                    tokenizedMessage[i] = this.bttvMessageTokenize(tokenizedMessage[i]);
+                } else {
+                    tokenizedMessage[i] = tokenizedMessage[i][0];
+                }
+            }
+
+            message = tokenizedMessage.join(' ');
+
+            formattedMessage.innerHTML = message;
+            Polymer.dom(this.root).appendChild(formattedMessage);
+        },
+
+        /*
+         * Methods
+         */
+        escape: function (message) {
+            return message.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        },
+        bttvEmoteTemplate: function (id) {
+            return '<img class="emoticon bttv-emo-' + id
+                    + '" src="' + this.bttvEmoteTemplate.replace('{{id}}', id).replace('{{image}}', '1x')
+                    + '" srcset="' + this.bttvEmoteTemplate.replace('{{id}}', id).replace('{{image}}', '2x') + ' 2x"'
+                    + ' />';
+        },
+        emoteTemplate: function (id) {
+            var template;
+
+            // TODO: this.emotesize can't be overridden by the parent page!
+            switch (this.emotesize) {
+                case 'small':
+                    template = '<img class="emoticon ttv-emo-' + id + '" src="//static-cdn.jtvnw.net/emoticons/v1/'
+                            + id + '/1.0" srcset="//static-cdn.jtvnw.net/emoticons/v1/' + id + '/2.0 2x" />';
+                    break;
+                case 'medium':
+                    template = '<img class="emoticon ttv-emo-' + id + '" src="//static-cdn.jtvnw.net/emoticons/v1/'
+                            + id + '/2.0" srcset="//static-cdn.jtvnw.net/emoticons/v1/' + id + '/3.0 2x" />';
+                    break;
+                case 'large':
+                    template = '<img class="emoticon ttv-emo-' + id + '" src="//static-cdn.jtvnw.net/emoticons/v1/'
+                            + id + '/3.0" />';
+                    break;
+            }
+            return template;
+        },
+        emoticonize: function (message, emotes) {
+            if (!emotes) return [message];
+
+            var self = this;
+            var tokenizedMessage = [];
+            var emotesList = Object.keys(emotes);
+            var replacements = [];
+
+            emotesList.forEach(function (id) {
+                var uses = emotes[id];
+
+                for (var i = uses.length - 1; i >= 0; i--) {
+                    var numbers = uses[i].split('-');
+                    replacements.push({id: id, first: Number(numbers[0]), last: Number(numbers[1])});
+                }
+            });
+
+            replacements.sort(function (a, b) {
+                return b.first - a.first;
+            });
+
+            // Tokenizes each character into an array
+            // punycode deals with unicode symbols on surrogate pairs
+            // punycode is used in the replacements loop below as well
+            message = punycode.ucs2.decode(message);
+
+            replacements.forEach(function (replacement) {
+                console.log(self.emoteTemplate(replacement.id));
+
+                // Unshift the end of the message (that doesn't contain the emote)
+                tokenizedMessage.unshift(punycode.ucs2.encode(message.slice(replacement.last + 1)));
+
+                // Unshift the emote HTML (but not as a string to allow us to process links and escape html still)
+                tokenizedMessage.unshift([self.emoteTemplate(replacement.id)]);
+
+                // Splice the unparsed piece of the message
+                message = message.slice(0, replacement.first);
+            });
+
+            // Unshift the remaining part of the message (that contains no emotes)
+            tokenizedMessage.unshift(punycode.ucs2.encode(message));
+
+            return tokenizedMessage;
+        },
+        bttvEmoticonize: function (message, emote) {
+            if (emote.restrictions) {
+                if (emote.restrictions.channels && emote.restrictions.channels.length
+                        && emote.restrictions.channels.indexOf(this.channel) === -1) return message;
+
+                if (emote.restrictions.games && emote.restrictions.games.length) return message;
+            }
+
+            return message.replace(emote.code, this.bttvEmoteTemplate(emote.id));
+        },
+        bttvMessageTokenize: function (message) {
+            var tokenizedString = message.split(' ');
+
+            for (var i = 0; i < tokenizedString.length; i++) {
+                var piece = tokenizedString[i];
+
+                var test = piece.replace(/(^[~!@#$%\^&\*\(\)]+|[~!@#$%\^&\*\(\)]+$)/g, '');
+                var emote = this.bttvEmotes[test] || this.bttvEmotes[piece];
+
+                if (emote) {
+                    piece = this.bttvEmoticonize(piece, emote);
+                } else {
+                    piece = this.escape(piece);
+                }
+
+                tokenizedString[i] = piece;
+            }
+
+            return tokenizedString.join(' ');
+        }
+    });
+</script>
