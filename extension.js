@@ -60,15 +60,15 @@ module.exports = function(nodecg) {
                 var channel = arguments[1];
                 if (channels.indexOf(channel) < 0) return;
                 nodecg.log.info('Joined channel:', channel);
-                self.emit('join', channel);
                 nodecg.sendMessage('join', channel);
+                self.emit('join', channel);
                 break;
             case 'part':
                 var channel = arguments[1];
                 if (channels.indexOf(channel) < 0) return;
                 nodecg.log.warn('Parted from:', channel);
-                self.emit('part', channel);
                 nodecg.sendMessage('part', channel);
+                self.emit('part', channel);
                 break;
             case 'chat':
                 var data = {
@@ -77,28 +77,28 @@ module.exports = function(nodecg) {
                     message: arguments[3]
                 };
                 if (channels.indexOf(data.channel) < 0) return;
-                self.emit('chat', data);
                 nodecg.sendMessage('chat', data);
+                self.emit('chat', data);
                 break;
             case 'timeout':
                 var data = {channel: arguments[1], username: arguments[2]};
                 if (channels.indexOf(data.channel) < 0) return;
-                self.emit('timeout', data);
                 nodecg.sendMessage('timeout', data);
+                self.emit('timeout', data);
                 break;
             case 'clearchat':
                 var channel = arguments[1];
                 if (channels.indexOf(channel) < 0) return;
-                self.emit('clearchat', channel);
                 nodecg.sendMessage('clearchat', channel);
+                self.emit('clearchat', channel);
                 break;
             case 'subscription':
                 var data = arguments[1];
                 if (channels.indexOf(data.channel) < 0) return;
                 if (equal(lastSub, data)) return;
                 lastSub = data;
-                self.emit('subscription', data);
                 nodecg.sendMessage('subscription', data);
+                self.emit('subscription', data);
                 break;
         }
     });
