@@ -180,7 +180,7 @@
                     Polymer.dom.flush();
                     self.queue = [];
                     self.scrollTop = self.scrollHeight;
-                    var chatLines = self.getElementsByClassName('chat-line');
+                    var chatLines = self.getElementsByTagName('twitch-chat-message');
                     var linesToDelete = chatLines.length - self.maxMessages;
                     if (linesToDelete > 0) {
                         for (var i = 0; i < linesToDelete; i++) {
