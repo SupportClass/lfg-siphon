@@ -1,7 +1,21 @@
 {
   "name": "lfg-siphon",
+  "version": "0.1.0",
   "dependencies": {
     "axon": "^2.0.1",
     "axon-rpc": "0.0.3"
+  },
+  "homepage": "http://supportclass.net/",
+  "authors": [
+    "Alex Van Camp <email@alexvan.camp>"
+  ],
+  "description": "IPC interface to Streen.",
+  "license": "Private",
+  "nodecg": {
+    "compatabilityRange": "~0.7.0",
+    "graphics": [],
+    "extension": {
+      "path": "extension.js"
+    }
   }
 }
