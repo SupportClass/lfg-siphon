@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge; charset=UTF-8">
+    <meta name="viewport" content="width=device-width" initial-scale="1">
+    <title>lfg-wordfilter Panel</title>
+    <script src="/components/webcomponentsjs/webcomponents-lite.min.js"></script>
+    <link rel="stylesheet" href="components/paper-styles/paper-styles.html">
+    <link rel="import" href="components/paper-button/paper-button.html">
+    <link rel="import" href="elements/lfg-subscription.html">
+    <style>
+        paper-button {
+            display: block;
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div id="subscriptions">
+
+</div>
+<paper-button id="clearAll" class="nodecg-danger">Clear All</paper-button>
+
+<script>
+    var subscriptions = document.getElementById('subscriptions');
+
+    nodecg.listenFor('subscription', function (data) {
+        var subscription = new LfgSubscription();
+        subscription.name = data.name;
+        subscription.resub = data.resub;
+        subscription.months = data.months;
+        subscriptions.appendChild(subscription);
+    });
+
+    document.getElementById('clearAll').addEventListener('click', function() {
+        while (subscriptions.firstChild) {
+            subscriptions.removeChild(subscriptions.firstChild);
+        }
+    }, false);
+</script>
+
+</body>
+</html>
