@@ -61,7 +61,7 @@
 
     nodecg.listenFor('subscription', function (data) {
         var subscription = new LfgSubscription();
-        subscription.name = data.name;
+        subscription.name = data.username;
         subscription.resub = data.resub;
         subscription.months = data.months;
         subscriptions.appendChild(subscription);
@@ -75,8 +75,6 @@
 
     // Observe #subscriptions
     var observer = new MutationObserver(function() {
-        console.log('in callback');
-
         if (subscriptions.firstChild) {
             subscriptions.style.display = 'block';
             clearAll.style.display = 'block';
