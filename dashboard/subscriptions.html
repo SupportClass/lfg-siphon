@@ -64,7 +64,7 @@
         subscription.name = data.username;
         subscription.resub = data.resub;
         subscription.months = data.months;
-        subscriptions.appendChild(subscription);
+        subscriptions.insertBefore(subscription, document.querySelector('lfg-subscription'));
     });
 
     clearAll.addEventListener('click', function() {
