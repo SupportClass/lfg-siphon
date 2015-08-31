@@ -22,9 +22,6 @@
         "faIcon": "fa-twitch"
       }
     ],
-    "graphics": [],
-    "extension": {
-      "path": "extension.js"
-    }
+    "graphics": []
   }
 }
