@@ -97,6 +97,7 @@ module.exports = function(nodecg) {
                 if (channels.indexOf(data.channel) < 0) return;
                 if (equal(lastSub, data)) return;
                 lastSub = data;
+                if (data.months) data.months = parseInt(data.months);
                 nodecg.sendMessage('subscription', data);
                 self.emit('subscription', data);
                 break;
