@@ -9,7 +9,7 @@ var rpcClient     = new rpc.Client(req);
 var equal         = require('deep-equal');
 
 module.exports = function(nodecg) {
-    if (!Object.keys(nodecg.bundleConfig).length) {
+    if (!nodecg.bundleConfig || !Object.keys(nodecg.bundleConfig).length) {
         throw new Error('[lfg-siphon] No config found in cfg/lfg-siphon.json, aborting!');
     }
 
