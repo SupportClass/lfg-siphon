@@ -95,8 +95,8 @@
                 rootDom.removeChild(rootDom.firstChild);
             }
         },
-        insert: function (nick, special, message, color, emotes) {
-            var newLine = new TwitchChatMessage(nick, special, message, color, emotes, this.bttvEmotes);
+        insert: function (user, message) {
+            var newLine = new TwitchChatMessage(user, message, this.bttvEmotes);
             this.queue.push(newLine);
         },
         loadEmotes: function (callback) {
@@ -172,7 +172,6 @@
                         frag.appendChild(item);
 
                         if(self.chatAnimation) {
-                            console.log('playing entry anim', self.chatAnimation);
                             item.playAnimation('entry');
                         }
                     });
@@ -205,8 +204,8 @@
                 //if(data.message.charAt(0) === '!') return;
                 //if(/bot$/.test(data.nick)) return;
                 if (data.channel !== self.channel) return;
-                var user = data.user;
-                self.insert(data['display-name'] || user.username, user.special, data.message, user.color, user.emote);
+                if (data.channel === data.user.username) data.user.broadcaster = true;
+                self.insert(data.user, data.message);
             });
 
             nodecg.listenFor('timeout', 'lfg-siphon', function (data) {

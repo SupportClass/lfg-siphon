@@ -36,6 +36,10 @@ module.exports = function(nodecg) {
 
                 if (alreadyJoined) {
                     nodecg.log.info('Streen already in channel:', alreadyJoined);
+                } else {
+                    nodecg.log.info('Joined channel:', channel);
+                    nodecg.sendMessage('join', channel);
+                    self.emit('join', channel);
                 }
             });
         });
@@ -49,6 +53,7 @@ module.exports = function(nodecg) {
 
     var lastSub;
     subSock.on('message', function(msg) {
+        var channel, data;
         switch (msg.toString()) {
             case 'connected':
                 nodecg.log.info('Streen connected to Twitch Chat');
@@ -56,44 +61,31 @@ module.exports = function(nodecg) {
             case 'disconnected':
                 nodecg.log.info('Streen disconnected from Twitch Chat');
                 break;
-            case 'join':
-                var channel = arguments[1];
-                if (channels.indexOf(channel) < 0) return;
-                nodecg.log.info('Joined channel:', channel);
-                nodecg.sendMessage('join', channel);
-                self.emit('join', channel);
-                break;
-            case 'part':
-                var channel = arguments[1];
-                if (channels.indexOf(channel) < 0) return;
-                nodecg.log.warn('Parted from:', channel);
-                nodecg.sendMessage('part', channel);
-                self.emit('part', channel);
-                break;
             case 'chat':
-                var data = {
+                data = {
                     channel: arguments[1],
                     user: arguments[2],
-                    message: arguments[3]
+                    message: arguments[3],
+                    self: arguments[4]
                 };
                 if (channels.indexOf(data.channel) < 0) return;
                 nodecg.sendMessage('chat', data);
                 self.emit('chat', data);
                 break;
             case 'timeout':
-                var data = {channel: arguments[1], username: arguments[2]};
+                data = {channel: arguments[1], username: arguments[2]};
                 if (channels.indexOf(data.channel) < 0) return;
                 nodecg.sendMessage('timeout', data);
                 self.emit('timeout', data);
                 break;
             case 'clearchat':
-                var channel = arguments[1];
+                channel = arguments[1];
                 if (channels.indexOf(channel) < 0) return;
                 nodecg.sendMessage('clearchat', channel);
                 self.emit('clearchat', channel);
                 break;
             case 'subscription':
-                var data = arguments[1];
+                data = arguments[1];
                 if (channels.indexOf(data.channel) < 0) return;
                 if (equal(lastSub, data)) return;
                 lastSub = data;
