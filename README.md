@@ -2,8 +2,8 @@
 This is a [NodeCG](http://github.com/nodecg/nodecg) bundle.
 
 This bundle is an interface to [Streen](https://github.com/SupportClass/streen), an IPC wrapper for 
-[twitch-irc](https://github.com/twitch-irc/twitch-irc). 
-Together, Streen and lfg-siphon enable one single twitch-irc instance to power multiple NodeCG instances.
+[tmi.js](https://github.com/Schmoopiie/tmi.js). 
+Together, Streen and lfg-siphon enable one single tmi.js instance to power multiple NodeCG instances.
 
 lfg-siphon also provides a custom `twitch-chat` Polymer component which other bundles can easily include in their views
 to get embedded Twitch Chat.
@@ -32,7 +32,7 @@ var siphon = nodecg.extensions['lfg-siphon'];
 
 ### siphon.timeout(channel, username, seconds)
 Times out a user on a channel for the given number of seconds.
-See the corresponding twitch-irc docs for more info ([link](http://www.twitch-irc.com/docs/twitch-irc/Commands/Timeout)).
+See the corresponding tmi.js docs for more info ([link](http://www.tmijs.org/docs/Commands.html#timeout)).
 
 ## Events
 ### siphon.on('connect', function () {})
@@ -41,19 +41,13 @@ When connected to Streen.
 ### siphon.on('disconnect', function () {})
 Emitted when connected to Streen.
 
-### siphon.on('join', function (channel) {})
-Emitted after joining a chat channel.
-
-### siphon.on('part', function (channel) {})
-Emitted after parting a chat channel.
-
 ### siphon.on('chat', function (data) {})
-Emitted on every chat message. `data` has the properties from twitch-irc's `chat` event
- ([docs](http://www.twitch-irc.com/docs/twitch-irc/Events/Chat)).
+Emitted on every chat message. `data` has the properties from tmi.js's `chat` event
+ ([docs](http://www.tmijs.org/docs/Events.html#chat)).
  
 ### siphon.on('timeout', function (data) {})
-Emitted when a user is timed out. `data` has the properties from twitch-irc's `timeout` event
- ([docs](http://www.twitch-irc.com/docs/twitch-irc/Events/Timeout)).
+Emitted when a user is timed out. `data` has the properties from tmi.js's `timeout` event
+ ([docs](http://www.tmijs.org/docs/Events.html#timeout)).
  
 ### siphon.on('clearchat', function (channel) {})
 Emitted when a mod clears the chat.
@@ -112,7 +106,7 @@ siphon.on('subscription', function (data) {
 ```
 
 ## Special Thanks
- - Schmoopiie, whose [twitch-irc](https://github.com/twitch-irc/twitch-irc) library makes this all possible
+ - Schmoopiie, whose [tmi.js](https://github.com/Schmoopiie/tmi.js) library makes this all possible
  - Night, from whose [OBS Chat](https://nightdev.com/obschat/) embed service the `twitch-chat` element borrows code heavily.
 
 ## License
