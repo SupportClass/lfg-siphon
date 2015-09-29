@@ -164,24 +164,30 @@
             }
         },
 
-        factoryImpl: function (nick, special, message, color, emotes, emoteData) {
+        factoryImpl: function (user, message, emoteData) {
             // TODO: Dumb hack, should be cleaned up
             this.bttvEmotes = emoteData;
 
-            nick = nick || 'Chat';
-            special = special || [];
+            user = user || {};
+
+            var nick = user['display-name'] || user.username || 'Chat';
             message = message || '';
-            color = color || '';
+            color = user.color || '';
 
             // Create chat line element
             Polymer.dom(this).setAttribute('data-nick', nick);
             Polymer.dom(this).setAttribute('data-timestamp', Date.now());
 
             // Create any special mod/brodcaster/sub icons to display before the username
+            var arrayOfBadges = [];
             var badges = document.createElement('span');
             badges.classList.add('badges');
-            special.forEach(function (status) {
-                if (status === 'mod' && special.indexOf('broadcaster') >= 0) return;
+            if (user.broadcaster) arrayOfBadges.push('broadcaster');
+            if (user.subscriber) arrayOfBadges.push('subscriber');
+            if (user.turbo) arrayOfBadges.push('turbo');
+            if (user['user-type']) arrayOfBadges.push(user['user-type']);
+            arrayOfBadges.forEach(function (status) {
+                if (status === 'mod' && user.broadcaster) return;
                 var badge = document.createElement('span');
                 badge.classList.add('badge', status);
                 badge.innerHTML = '&nbsp;';
@@ -206,7 +212,7 @@
             var formattedMessage = document.createElement('span');
             formattedMessage.classList.add('message');
 
-            var tokenizedMessage = this.emoticonize(message, emotes);
+            var tokenizedMessage = this.emoticonize(message, user.emotes);
 
             for (var i = 0; i < tokenizedMessage.length; i++) {
                 if (typeof tokenizedMessage[i] === 'string') {

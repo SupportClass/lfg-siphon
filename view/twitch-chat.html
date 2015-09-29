@@ -79,7 +79,7 @@
                 value: 'small',
                 reflectToAttribute: true
             },
-            animate: {
+            chatAnimation: {
                 type: Boolean,
                 value: false
             }
@@ -95,45 +95,45 @@
                 rootDom.removeChild(rootDom.firstChild);
             }
         },
-        insert: function (nick, special, message, color, emotes) {
-            var newLine = new TwitchChatMessage(nick, special, message, color, emotes, this.bttvEmotes);
+        insert: function (user, message) {
+            var newLine = new TwitchChatMessage(user, message, this.bttvEmotes);
             this.queue.push(newLine);
         },
         loadEmotes: function (callback) {
             var self = this;
             $.getJSON('https://api.betterttv.net/2/emotes')
-                .done(function (data) {
-                    data.emotes.forEach(function (emote) {
-                        self.bttvEmotes[emote.code] = emote;
-                    });
+                    .done(function (data) {
+                        data.emotes.forEach(function (emote) {
+                            self.bttvEmotes[emote.code] = emote;
+                        });
 
-                    // TODO: This never gets passed to the TwitchChatMessage elements!
-                    self.bttvEmoteTemplate = data.urlTemplate;
-                });
-            $.getJSON('https://api.betterttv.net/2/channels/' + encodeURIComponent(self.channel))
-                .done(function (data) {
-                    data.emotes.forEach(function (emote) {
-                        self.bttvEmotes[emote.code] = emote;
+                        // TODO: This never gets passed to the TwitchChatMessage elements!
+                        self.bttvEmoteTemplate = data.urlTemplate;
                     });
-                });
+            $.getJSON('https://api.betterttv.net/2/channels/' + encodeURIComponent(self.channel))
+                    .done(function (data) {
+                        data.emotes.forEach(function (emote) {
+                            self.bttvEmotes[emote.code] = emote;
+                        });
+                    });
 
             callback(true);
         },
         loadSubscriberBadge: function (callback) {
             $.getJSON('https://api.twitch.tv/kraken/chat/' + this.channel + '/badges?callback=?')
-                .done(function (e) {
-                    callback(true);
-                    if (!e.subscriber) return;
-                    var $css = $('<style></style>');
-                    $css.attr('type', 'text/css');
-                    $css.html('.subscriber { background-image: url("'
-                            + e.subscriber.image.replace('http:', 'https:') + '"); }');
-                    $('head').append($css);
-                });
+                    .done(function (e) {
+                        callback(true);
+                        if (!e.subscriber) return;
+                        var $css = $('<style></style>');
+                        $css.attr('type', 'text/css');
+                        $css.html('.subscriber { background-image: url("'
+                                + e.subscriber.image.replace('http:', 'https:') + '"); }');
+                        $('head').append($css);
+                    });
         },
         timeout: function(nick) {
             var rootDom = Polymer.dom(this.root);
-            var linesToDelete = rootDom.querySelectorAll('.chat-line[data-nick='+nick+']');
+            var linesToDelete = rootDom.querySelectorAll('.chat-line[data-nick="'+nick+'"]');
             var deleted = document.createElement('span');
             deleted.classList.add('deleted');
             deleted.innerHTML = '&lt;message deleted&gt;';
@@ -171,7 +171,7 @@
                     self.queue.forEach(function(item) {
                         frag.appendChild(item);
 
-                        if(self.animate) {
+                        if(self.chatAnimation) {
                             item.playAnimation('entry');
                         }
                     });
@@ -179,7 +179,7 @@
                     Polymer.dom.flush();
                     self.queue = [];
                     self.scrollTop = self.scrollHeight;
-                    var chatLines = self.getElementsByClassName('chat-line');
+                    var chatLines = self.getElementsByTagName('twitch-chat-message');
                     var linesToDelete = chatLines.length - self.maxMessages;
                     if (linesToDelete > 0) {
                         for (var i = 0; i < linesToDelete; i++) {
@@ -204,8 +204,8 @@
                 //if(data.message.charAt(0) === '!') return;
                 //if(/bot$/.test(data.nick)) return;
                 if (data.channel !== self.channel) return;
-                var user = data.user;
-                self.insert(data['display-name'] || user.username, user.special, data.message, user.color, user.emote);
+                if (data.channel === data.user.username) data.user.broadcaster = true;
+                self.insert(data.user, data.message);
             });
 
             nodecg.listenFor('timeout', 'lfg-siphon', function (data) {
