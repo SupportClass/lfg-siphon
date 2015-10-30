@@ -93,7 +93,7 @@ module.exports = function(nodecg) {
                 // 10-30-2015: Streen now ensures that "months" is an integer.
                 // The below line can be removed soon.
                 if (data.months) data.months = parseInt(data.months);
-                
+
                 nodecg.sendMessage('subscription', data);
                 self.emit('subscription', data);
                 break;
@@ -105,7 +105,6 @@ module.exports = function(nodecg) {
         rpcClient.call('heartbeat', channels, function(err, interval) {
             if (err) {
                 nodecg.log.error(err.stack);
-                return;
             }
 
             heartbeatTimeout = setTimeout(heartbeat, interval);
