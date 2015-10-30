@@ -89,7 +89,11 @@ module.exports = function(nodecg) {
                 if (channels.indexOf(data.channel) < 0) return;
                 if (equal(lastSub, data)) return;
                 lastSub = data;
+
+                // 10-30-2015: Streen now ensures that "months" is an integer.
+                // The below line can be removed soon.
                 if (data.months) data.months = parseInt(data.months);
+                
                 nodecg.sendMessage('subscription', data);
                 self.emit('subscription', data);
                 break;
