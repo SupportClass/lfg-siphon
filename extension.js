@@ -101,15 +101,22 @@ module.exports = function(nodecg) {
     });
 
     var heartbeatTimeout = setTimeout(heartbeat, 5000);
+    var lastHeartbeatInterval = 5000;
     function heartbeat() {
         rpcClient.call('heartbeat', channels, function(err, interval) {
             if (err) {
                 nodecg.log.error(err.stack);
             }
 
-            heartbeatTimeout = setTimeout(heartbeat, interval);
+            heartbeatTimeout = setTimeout(heartbeat, interval || lastHeartbeatInterval);
         });
     }
+
+    self.say = function(channel, message) {
+        rpcClient.call('say', channel, message, function(err){
+            if (err) nodecg.log.error(err.stack);
+        });
+    };
 
     self.timeout = function(channel, username, seconds) {
         rpcClient.call('timeout', channel, username, seconds, function(err){
