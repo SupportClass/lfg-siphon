@@ -30,6 +30,10 @@ From an extension:
 var siphon = nodecg.extensions['lfg-siphon'];
 ```
 
+### siphon.say(channel, message)
+Send a message to a chat channel.
+See the corresponding tmi.js docs for more info ([link](http://www.tmijs.org/docs/Commands.md#say)).
+
 ### siphon.timeout(channel, username, seconds)
 Times out a user on a channel for the given number of seconds.
 See the corresponding tmi.js docs for more info ([link](http://www.tmijs.org/docs/Commands.html#timeout)).
