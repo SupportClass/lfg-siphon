@@ -38,13 +38,15 @@
             padding: 0 12px;
         }
 
-        #reject {
+        #remove {
             padding: 2px;
             flex-shrink: 0;
             color: white;
+            width: 30px;
+            height: 30px;
         }
 
-        #reject:hover {
+        #remove:hover {
             background: var(--paper-red-50);
             border-radius: 50%;
         }
@@ -52,7 +54,7 @@
 
     <template>
         <div id="body" title="[[body]]">[[body]]</div>
-        <paper-icon-button id="reject" on-click="removeSelf" icon="clear" title="Reject"></paper-icon-button>
+        <paper-icon-button id="remove" on-click="removeSelf" icon="clear" title="Remove"></paper-icon-button>
     </template>
 </dom-module>
 
