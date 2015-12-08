@@ -101,15 +101,29 @@ module.exports = function(nodecg) {
     });
 
     var heartbeatTimeout = setTimeout(heartbeat, 5000);
+    var heartbeatResponseTimeout;
     var lastHeartbeatInterval = 5000;
     function heartbeat() {
+        // If we don't hear back from Streen in 1000ms, we assume Streen is down and keep trying.
+        heartbeatResponseTimeout = setTimeout(handleHeartbeatTimeout, 1000);
+
+        // Emit the heartbeat, and schedule the next one based on Streen's response.
         rpcClient.call('heartbeat', channels, function(err, interval) {
             if (err) {
                 nodecg.log.error(err.stack);
             }
 
-            heartbeatTimeout = setTimeout(heartbeat, interval || lastHeartbeatInterval);
+            var intervalDuration = interval || lastHeartbeatInterval;
+            clearTimeout(heartbeatResponseTimeout);
+            clearTimeout(heartbeatTimeout);
+            heartbeatTimeout = setTimeout(heartbeat, intervalDuration);
+            lastHeartbeatInterval = intervalDuration;
         });
+    }
+
+    function handleHeartbeatTimeout() {
+        nodecg.log.error('Streen did not respond to heartbeat. Sending another...');
+        heartbeatTimeout = setTimeout(heartbeat, lastHeartbeatInterval);
     }
 
     self.say = function(channel, message) {
