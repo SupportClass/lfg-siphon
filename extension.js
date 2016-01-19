@@ -89,7 +89,11 @@ module.exports = function(nodecg) {
                 if (channels.indexOf(data.channel) < 0) return;
                 if (equal(lastSub, data)) return;
                 lastSub = data;
+
+                // 10-30-2015: Streen now ensures that "months" is an integer.
+                // The below line can be removed soon.
                 if (data.months) data.months = parseInt(data.months);
+
                 nodecg.sendMessage('subscription', data);
                 self.emit('subscription', data);
                 break;
@@ -97,16 +101,36 @@ module.exports = function(nodecg) {
     });
 
     var heartbeatTimeout = setTimeout(heartbeat, 5000);
+    var heartbeatResponseTimeout;
+    var lastHeartbeatInterval = 5000;
     function heartbeat() {
+        // If we don't hear back from Streen in 1000ms, we assume Streen is down and keep trying.
+        heartbeatResponseTimeout = setTimeout(handleHeartbeatTimeout, 1000);
+
+        // Emit the heartbeat, and schedule the next one based on Streen's response.
         rpcClient.call('heartbeat', channels, function(err, interval) {
             if (err) {
                 nodecg.log.error(err.stack);
-                return;
             }
 
-            heartbeatTimeout = setTimeout(heartbeat, interval);
+            var intervalDuration = interval || lastHeartbeatInterval;
+            clearTimeout(heartbeatResponseTimeout);
+            clearTimeout(heartbeatTimeout);
+            heartbeatTimeout = setTimeout(heartbeat, intervalDuration);
+            lastHeartbeatInterval = intervalDuration;
         });
     }
+
+    function handleHeartbeatTimeout() {
+        nodecg.log.error('Streen did not respond to heartbeat. Sending another...');
+        heartbeatTimeout = setTimeout(heartbeat, lastHeartbeatInterval);
+    }
+
+    self.say = function(channel, message) {
+        rpcClient.call('say', channel, message, function(err){
+            if (err) nodecg.log.error(err.stack);
+        });
+    };
 
     self.timeout = function(channel, username, seconds) {
         rpcClient.call('timeout', channel, username, seconds, function(err){

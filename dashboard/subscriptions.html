@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge; charset=UTF-8">
+    <meta name="viewport" content="width=device-width" initial-scale="1">
+    <title>lfg-wordfilter Panel</title>
+    <script src="components/webcomponentsjs/webcomponents-lite.min.js"></script>
+    <link rel="stylesheet" href="components/paper-styles/paper-styles.html">
+    <link rel="import" href="components/paper-button/paper-button.html">
+    <link rel="import" href="elements/lfg-subscription.html">
+    <style>
+        #container {
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #subscriptions {
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        paper-button {
+            display: block;
+            margin: 8px 0;
+        }
+
+        #clearAll,
+        #subscriptions {
+            display: none;
+        }
+
+        #clearAll {
+            margin-bottom: 0;
+        }
+
+        #empty {
+            text-align: center;
+            border: 4px dashed #B7B7B7;
+            height: 100%;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+        }
+    </style>
+</head>
+<body>
+
+<div id="container">
+    <div id="empty">
+        <span>No recent subscriptions!</span>
+    </div>
+    <div id="subscriptions"></div>
+    <paper-button id="clearAll" class="nodecg-danger">Clear All</paper-button>
+</div>
+
+<script>
+    var subscriptions = document.getElementById('subscriptions');
+    var clearAll = document.getElementById('clearAll');
+    var empty = document.getElementById('empty');
+
+    nodecg.listenFor('subscription', function (data) {
+        var subscription = new LfgSubscription();
+        subscription.name = data.username;
+        subscription.resub = data.resub;
+        subscription.months = data.months;
+        subscriptions.insertBefore(subscription, document.querySelector('lfg-subscription'));
+    });
+
+    clearAll.addEventListener('click', function() {
+        while (subscriptions.firstChild) {
+            subscriptions.removeChild(subscriptions.firstChild);
+        }
+    }, false);
+
+    // Observe #subscriptions
+    var observer = new MutationObserver(function() {
+        if (subscriptions.firstChild) {
+            subscriptions.style.display = 'block';
+            clearAll.style.display = 'block';
+            empty.style.display = 'none';
+        } else {
+            subscriptions.style.display = 'none';
+            clearAll.style.display = 'none';
+            empty.style.display = 'flex';
+        }
+    });
+    observer.observe(subscriptions, {
+        childList: true,
+        subtree: true
+    });
+</script>
+
+</body>
+</html>
