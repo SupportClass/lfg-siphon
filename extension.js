@@ -1,34 +1,34 @@
 'use strict';
 
-var EventEmitter  = require('events').EventEmitter;
-var axon          = require('axon');
-var rpc           = require('axon-rpc');
-var req           = axon.socket('req');
-var subSock       = axon.socket('sub');
-var rpcClient     = new rpc.Client(req);
-var equal         = require('deep-equal');
+var EventEmitter = require('events').EventEmitter;
+var axon = require('axon');
+var rpc = require('axon-rpc');
+var req = axon.socket('req');
+var subSock = axon.socket('sub');
+var rpcClient = new rpc.Client(req);
+var equal = require('deep-equal');
 
-module.exports = function(nodecg) {
+module.exports = function (nodecg) {
     if (!nodecg.bundleConfig || !Object.keys(nodecg.bundleConfig).length) {
         throw new Error('[lfg-siphon] No config found in cfg/lfg-siphon.json, aborting!');
     }
 
-    var self     = new EventEmitter();
+    var self = new EventEmitter();
     var channels = nodecg.bundleConfig.channels;
     var SUB_PORT = nodecg.bundleConfig.subPort || 9455;
     var RPC_PORT = nodecg.bundleConfig.rpcPort || 9456;
 
-    nodecg.listenFor('getChannels', function(data, cb) {
+    nodecg.listenFor('getChannels', function (data, cb) {
         cb(channels);
     });
 
     subSock.connect(SUB_PORT, '127.0.0.1');
     req.connect(RPC_PORT, '127.0.0.1');
 
-    subSock.on('connect', function() {
+    subSock.on('connect', function () {
         nodecg.log.info('Connected to Streen');
-        channels.forEach(function(channel) {
-            rpcClient.call('join', channel, function(err, alreadyJoined) {
+        channels.forEach(function (channel) {
+            rpcClient.call('join', channel, function (err, alreadyJoined) {
                 if (err) {
                     nodecg.log.error(err.stack);
                     return;
@@ -45,14 +45,14 @@ module.exports = function(nodecg) {
         });
     });
 
-    subSock.on('disconnect', function() {
+    subSock.on('disconnect', function () {
         nodecg.log.warn('Disconnected from Streen');
         self.emit('disconnect');
         nodecg.sendMessage('disconnect');
     });
 
     var lastSub;
-    subSock.on('message', function(msg) {
+    subSock.on('message', function (msg) {
         var channel, data;
         switch (msg.toString()) {
             case 'connected':
@@ -103,12 +103,13 @@ module.exports = function(nodecg) {
     var heartbeatTimeout = setTimeout(heartbeat, 5000);
     var heartbeatResponseTimeout;
     var lastHeartbeatInterval = 5000;
+
     function heartbeat() {
         // If we don't hear back from Streen in 1000ms, we assume Streen is down and keep trying.
         heartbeatResponseTimeout = setTimeout(handleHeartbeatTimeout, 1000);
 
         // Emit the heartbeat, and schedule the next one based on Streen's response.
-        rpcClient.call('heartbeat', channels, function(err, interval) {
+        rpcClient.call('heartbeat', channels, function (err, interval) {
             if (err) {
                 nodecg.log.error(err.stack);
             }
@@ -122,19 +123,25 @@ module.exports = function(nodecg) {
     }
 
     function handleHeartbeatTimeout() {
-        nodecg.log.error('Streen did not respond to heartbeat. Sending another...');
         heartbeatTimeout = setTimeout(heartbeat, lastHeartbeatInterval);
     }
 
-    self.say = function(channel, message) {
-        rpcClient.call('say', channel, message, function(err){
-            if (err) nodecg.log.error(err.stack);
+    self.say = function (channel, message, callback) {
+        rpcClient.call('say', channel, message, function () {
+            callback.apply(callback, arguments);
         });
     };
 
-    self.timeout = function(channel, username, seconds) {
-        rpcClient.call('timeout', channel, username, seconds, function(err){
-            if (err) nodecg.log.error(err.stack);
+    self.timeout = function (channel, username, seconds, callback) {
+        rpcClient.call('timeout', channel, username, seconds, function () {
+            callback.apply(callback, arguments);
+        });
+    };
+
+    self.mods = function (channel, callback) {
+        callback = callback || function () {};
+        rpcClient.call('mods', channel, function () {
+            callback.apply(callback, arguments);
         });
     };
 
