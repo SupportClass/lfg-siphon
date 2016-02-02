@@ -128,20 +128,26 @@ module.exports = function (nodecg) {
 
     self.say = function (channel, message, callback) {
         rpcClient.call('say', channel, message, function () {
-            callback.apply(callback, arguments);
+            if (typeof callback === 'function') {
+                callback.apply(callback, arguments);
+            }
         });
     };
 
     self.timeout = function (channel, username, seconds, callback) {
         rpcClient.call('timeout', channel, username, seconds, function () {
-            callback.apply(callback, arguments);
+            if (typeof callback === 'function') {
+                callback.apply(callback, arguments);
+            }
         });
     };
 
     self.mods = function (channel, callback) {
         callback = callback || function () {};
         rpcClient.call('mods', channel, function () {
-            callback.apply(callback, arguments);
+            if (typeof callback === 'function') {
+                callback.apply(callback, arguments);
+            }
         });
     };
 
