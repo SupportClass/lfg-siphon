@@ -8,6 +8,8 @@ Together, Streen and lfg-siphon enable one single tmi.js instance to power multi
 lfg-siphon also provides a custom `twitch-chat` Polymer component which other bundles can easily include in their views
 to get embedded Twitch Chat.
 
+This bundle integrates with [`lfg-nucleus`](https://github.com/SupportClass/lfg-nucleus).
+
 ## Installation
 - Install to `nodecg/bundles/lfg-siphon`
 - Create `nodecg/cfg/lfg-siphon.json` with a list of Twitch chat channels to listen to.
