@@ -11,16 +11,6 @@
   "license": "Private",
   "nodecg": {
     "compatibleRange": "~0.7.0",
-    "dashboardPanels": [
-      {
-        "name": "subscriptions",
-        "title": "Subscriptions",
-        "width": 2,
-        "headerColor": "#564573",
-        "file": "subscriptions.html",
-        "faIcon": "fa-twitch"
-      }
-    ],
     "graphics": []
   }
 }
