@@ -8,7 +8,8 @@
   "homepage": "http://supportclass.net/",
   "author": "Alex Van Camp <email@alexvan.camp>",
   "description": "IPC interface to Streen.",
-  "license": "Private",
+  "license": "MIT",
+  "repository": "https://lange@github.com/SupportClass/lfg-siphon.git",
   "nodecg": {
     "compatibleRange": "~0.7.0",
     "graphics": []
