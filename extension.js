@@ -1,155 +1,161 @@
 'use strict';
 
-var EventEmitter = require('events').EventEmitter;
-var axon = require('axon');
-var rpc = require('axon-rpc');
-var req = axon.socket('req');
-var subSock = axon.socket('sub');
-var rpcClient = new rpc.Client(req);
-var equal = require('deep-equal');
+const EventEmitter = require('events').EventEmitter;
+const axon = require('axon');
+const rpc = require('axon-rpc');
+const req = axon.socket('req');
+const subSock = axon.socket('sub');
+const rpcClient = new rpc.Client(req);
+const equal = require('deep-equal');
 
 module.exports = function (nodecg) {
-    if (!nodecg.bundleConfig || !Object.keys(nodecg.bundleConfig).length) {
-        throw new Error('[lfg-siphon] No config found in cfg/lfg-siphon.json, aborting!');
-    }
+	if (!nodecg.bundleConfig || !Object.keys(nodecg.bundleConfig).length) {
+		throw new Error('[lfg-siphon] No config found in cfg/lfg-siphon.json, aborting!');
+	}
 
-    var self = new EventEmitter();
-    var channels = nodecg.bundleConfig.channels;
-    var SUB_PORT = nodecg.bundleConfig.subPort || 9455;
-    var RPC_PORT = nodecg.bundleConfig.rpcPort || 9456;
+	const self = new EventEmitter();
+	const channels = nodecg.bundleConfig.channels;
+	const SUB_PORT = nodecg.bundleConfig.subPort || 9455;
+	const RPC_PORT = nodecg.bundleConfig.rpcPort || 9456;
 
-    nodecg.listenFor('getChannels', function (data, cb) {
-        cb(channels);
-    });
+	nodecg.listenFor('getChannels', (data, cb) => cb(channels));
 
-    subSock.connect(SUB_PORT, '127.0.0.1');
-    req.connect(RPC_PORT, '127.0.0.1');
+	subSock.connect(SUB_PORT, '127.0.0.1');
+	req.connect(RPC_PORT, '127.0.0.1');
 
-    subSock.on('connect', function () {
-        nodecg.log.info('Connected to Streen');
-        channels.forEach(function (channel) {
-            rpcClient.call('join', channel, function (err, alreadyJoined) {
-                if (err) {
-                    nodecg.log.error(err.stack);
-                    return;
-                }
+	subSock.on('connect', () => {
+		nodecg.log.info('Connected to Streen');
+		channels.forEach(channel => {
+			rpcClient.call('join', channel, (err, alreadyJoined) => {
+				if (err) {
+					nodecg.log.error(err.stack);
+					return;
+				}
 
-                if (alreadyJoined) {
-                    nodecg.log.info('Streen already in channel:', alreadyJoined);
-                } else {
-                    nodecg.log.info('Joined channel:', channel);
-                    nodecg.sendMessage('join', channel);
-                    self.emit('join', channel);
-                }
-            });
-        });
-    });
+				if (alreadyJoined) {
+					nodecg.log.info('Streen already in channel:', alreadyJoined);
+				} else {
+					nodecg.log.info('Joined channel:', channel);
+					nodecg.sendMessage('join', channel);
+					self.emit('join', channel);
+				}
+			});
+		});
+	});
 
-    subSock.on('disconnect', function () {
-        nodecg.log.warn('Disconnected from Streen');
-        self.emit('disconnect');
-        nodecg.sendMessage('disconnect');
-    });
+	subSock.on('disconnect', () => {
+		nodecg.log.warn('Disconnected from Streen');
+		self.emit('disconnect');
+		nodecg.sendMessage('disconnect');
+	});
 
-    var lastSub;
-    subSock.on('message', function (msg) {
-        var channel, data;
-        switch (msg.toString()) {
-            case 'connected':
-                nodecg.log.info('Streen connected to Twitch Chat');
-                break;
-            case 'disconnected':
-                nodecg.log.info('Streen disconnected from Twitch Chat');
-                break;
-            case 'chat':
-                data = {
-                    channel: arguments[1],
-                    user: arguments[2],
-                    message: arguments[3],
-                    self: arguments[4]
-                };
-                if (channels.indexOf(data.channel) < 0) return;
-                nodecg.sendMessage('chat', data);
-                self.emit('chat', data);
-                break;
-            case 'timeout':
-                data = {channel: arguments[1], username: arguments[2]};
-                if (channels.indexOf(data.channel) < 0) return;
-                nodecg.sendMessage('timeout', data);
-                self.emit('timeout', data);
-                break;
-            case 'clearchat':
-                channel = arguments[1];
-                if (channels.indexOf(channel) < 0) return;
-                nodecg.sendMessage('clearchat', channel);
-                self.emit('clearchat', channel);
-                break;
-            case 'subscription':
-                data = arguments[1];
-                if (channels.indexOf(data.channel) < 0) return;
-                if (equal(lastSub, data)) return;
-                lastSub = data;
+	let lastSub;
+	subSock.on('message', msg => {
+		let channel;
+		let data;
+		switch (msg.toString()) {
+			case 'connected':
+				nodecg.log.info('Streen connected to Twitch Chat');
+				break;
+			case 'disconnected':
+				nodecg.log.info('Streen disconnected from Twitch Chat');
+				break;
+			case 'chat':
+				data = {
+					channel: arguments[1],
+					user: arguments[2],
+					message: arguments[3],
+					self: arguments[4]
+				};
+				if (channels.indexOf(data.channel) < 0) {
+					return;
+				}
+				nodecg.sendMessage('chat', data);
+				self.emit('chat', data);
+				break;
+			case 'timeout':
+				data = {channel: arguments[1], username: arguments[2]};
+				if (channels.indexOf(data.channel) < 0) {
+					return;
+				}
+				nodecg.sendMessage('timeout', data);
+				self.emit('timeout', data);
+				break;
+			case 'clearchat':
+				channel = arguments[1];
+				if (channels.indexOf(channel) < 0) {
+					return;
+				}
+				nodecg.sendMessage('clearchat', channel);
+				self.emit('clearchat', channel);
+				break;
+			case 'subscription':
+				data = arguments[1];
+				if (channels.indexOf(data.channel) < 0) {
+					return;
+				}
+				if (equal(lastSub, data)) {
+					return;
+				}
+				lastSub = data;
+				nodecg.sendMessage('subscription', data);
+				self.emit('subscription', data);
+				break;
+			default:
+				/* do nothing */
+		}
+	});
 
-                // 10-30-2015: Streen now ensures that "months" is an integer.
-                // The below line can be removed soon.
-                if (data.months) data.months = parseInt(data.months);
+	let heartbeatTimeout = setTimeout(heartbeat, 5000);
+	let heartbeatResponseTimeout;
+	let lastHeartbeatInterval = 5000;
 
-                nodecg.sendMessage('subscription', data);
-                self.emit('subscription', data);
-                break;
-        }
-    });
+	function heartbeat() {
+		// If we don't hear back from Streen in 1000ms, we assume Streen is down and keep trying.
+		heartbeatResponseTimeout = setTimeout(handleHeartbeatTimeout, 1000);
 
-    var heartbeatTimeout = setTimeout(heartbeat, 5000);
-    var heartbeatResponseTimeout;
-    var lastHeartbeatInterval = 5000;
+		// Emit the heartbeat, and schedule the next one based on Streen's response.
+		rpcClient.call('heartbeat', channels, (err, interval) => {
+			if (err) {
+				nodecg.log.error(err.stack);
+			}
 
-    function heartbeat() {
-        // If we don't hear back from Streen in 1000ms, we assume Streen is down and keep trying.
-        heartbeatResponseTimeout = setTimeout(handleHeartbeatTimeout, 1000);
+			const intervalDuration = interval || lastHeartbeatInterval;
+			clearTimeout(heartbeatResponseTimeout);
+			clearTimeout(heartbeatTimeout);
+			heartbeatTimeout = setTimeout(heartbeat, intervalDuration);
+			lastHeartbeatInterval = intervalDuration;
+		});
+	}
 
-        // Emit the heartbeat, and schedule the next one based on Streen's response.
-        rpcClient.call('heartbeat', channels, function (err, interval) {
-            if (err) {
-                nodecg.log.error(err.stack);
-            }
+	function handleHeartbeatTimeout() {
+		heartbeatTimeout = setTimeout(heartbeat, lastHeartbeatInterval);
+	}
 
-            var intervalDuration = interval || lastHeartbeatInterval;
-            clearTimeout(heartbeatResponseTimeout);
-            clearTimeout(heartbeatTimeout);
-            heartbeatTimeout = setTimeout(heartbeat, intervalDuration);
-            lastHeartbeatInterval = intervalDuration;
-        });
-    }
+	self.say = function (channel, message, callback) {
+		rpcClient.call('say', channel, message, () => {
+			if (typeof callback === 'function') {
+				callback.apply(callback, arguments);
+			}
+		});
+	};
 
-    function handleHeartbeatTimeout() {
-        heartbeatTimeout = setTimeout(heartbeat, lastHeartbeatInterval);
-    }
+	self.timeout = function (channel, username, seconds, callback) {
+		rpcClient.call('timeout', channel, username, seconds, () => {
+			if (typeof callback === 'function') {
+				callback.apply(callback, arguments);
+			}
+		});
+	};
 
-    self.say = function (channel, message, callback) {
-        rpcClient.call('say', channel, message, function () {
-            if (typeof callback === 'function') {
-                callback.apply(callback, arguments);
-            }
-        });
-    };
+	self.mods = function (channel, callback) {
+		callback = callback || function () {};
+		rpcClient.call('mods', channel, () => {
+			if (typeof callback === 'function') {
+				callback.apply(callback, arguments);
+			}
+		});
+	};
 
-    self.timeout = function (channel, username, seconds, callback) {
-        rpcClient.call('timeout', channel, username, seconds, function () {
-            if (typeof callback === 'function') {
-                callback.apply(callback, arguments);
-            }
-        });
-    };
-
-    self.mods = function (channel, callback) {
-        callback = callback || function () {};
-        rpcClient.call('mods', channel, function () {
-            if (typeof callback === 'function') {
-                callback.apply(callback, arguments);
-            }
-        });
-    };
-
-    return self;
+	return self;
 };

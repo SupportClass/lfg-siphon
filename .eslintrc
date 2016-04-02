@@ -1,0 +1,22 @@
+{
+	"root": true,
+	"extends": "xo/esnext",
+	"globals": {
+		"nodecg": true
+	},
+	"rules": {
+		"new-cap": [0],
+		"babel/new-cap": [
+			2,
+			{
+				"capIsNewExceptions": [
+					"Polymer",
+					"nodecg.Replicant"
+				]
+			}
+		]
+	},
+	"plugins": [
+		"html"
+	]
+}
