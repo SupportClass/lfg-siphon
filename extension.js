@@ -50,7 +50,7 @@ module.exports = function (nodecg) {
 	});
 
 	let lastSub;
-	subSock.on('message', msg => {
+	subSock.on('message', function (msg) {
 		let channel;
 		let data;
 		switch (msg.toString()) {
