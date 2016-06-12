@@ -16,7 +16,7 @@
   "license": "MIT",
   "repository": "https://lange@github.com/SupportClass/lfg-siphon.git",
   "nodecg": {
-    "compatibleRange": "~0.7.0",
+    "compatibleRange": "0.7.0 - 0.8.x",
     "graphics": []
   },
   "devDependencies": {
