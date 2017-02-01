@@ -5,8 +5,7 @@
 		"nodecg": true
 	},
 	"rules": {
-		"new-cap": [0],
-		"babel/new-cap": [
+		"new-cap": [
 			2,
 			{
 				"capIsNewExceptions": [
