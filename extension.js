@@ -52,7 +52,6 @@ module.exports = function (nodecg) {
 	});
 
 	socket.on('chat', data => {
-		console.log('CHAT:', data);
 		if (channels.indexOf(data.channel) < 0) {
 			return;
 		}
