@@ -1,3 +1,13 @@
+<a name="0.4.1"></a>
+## [0.4.1](https://github.com/SupportClass/lfg-siphon/compare/v0.4.0...v0.4.1) (2017-02-01)
+
+
+### Bug Fixes
+
+* remove debug print ([1ae242c](https://github.com/SupportClass/lfg-siphon/commit/1ae242c))
+
+
+
 <a name="0.4.0"></a>
 # [0.4.0](https://github.com/SupportClass/lfg-siphon/compare/v0.3.0...v0.4.0) (2017-02-01)
 
