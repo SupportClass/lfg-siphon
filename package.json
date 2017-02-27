@@ -11,7 +11,7 @@
   },
   "homepage": "http://supportclass.net/",
   "author": "Alex Van Camp <email@alexvan.camp>",
-  "description": "IPC interface to Streen.",
+  "description": "WebSocket interface to Streen.",
   "license": "MIT",
   "repository": "https://lange@github.com/SupportClass/lfg-siphon.git",
   "nodecg": {
