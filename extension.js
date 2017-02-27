@@ -22,7 +22,7 @@ module.exports = function (nodecg) {
 		channels.forEach(channel => {
 			socket.emit('join', channel, (err, alreadyJoined) => {
 				if (err) {
-					nodecg.log.error(err.stack);
+					nodecg.log.error(err);
 					return;
 				}
 
@@ -104,7 +104,7 @@ module.exports = function (nodecg) {
 		// Emit the heartbeat, and schedule the next one based on Streen's response.
 		socket.emit('heartbeat', channels, (err, interval) => {
 			if (err) {
-				nodecg.log.error(err.stack);
+				nodecg.log.error(err);
 			}
 
 			const intervalDuration = interval || lastHeartbeatInterval;
