@@ -67,6 +67,16 @@ data.resub    // Boolean, whether or not this is a resub
 data.months   // If this is a resub, this will be the number of months they have been subscribed for
 data.ts       // Unix timestamp (in milliseconds)
 ```
+
+### siphon.on('cheer', function (data) {})
+Emitted on both subscriptions and sub anniversaries (resubs). `data` has the following properties:
+```js
+data.channel   // What channel this Cheer occurred in
+data.userstate // An object containing many details about this Cheer. `userstate.bits` will tell you the amount of bits cheered.
+data.message   // The message, if any, that accompanied the cheer.
+data.ts        // Unix timestamp (in milliseconds)
+```
+
 ## Usage
 ### As a dashboard panel
 If you simply want a list of recent subs on your dashboard, you are done.
@@ -76,7 +86,7 @@ If you would like to use this data in another bundle, add listen for the desired
 
 Example:
 ```javascript
-nodecg.listenFor('subscription', 'lfg-siphon', function(data) {
+nodecg.listenFor('subscription', 'lfg-siphon', data => {
     console.log(data);
 });
 ```
@@ -105,8 +115,8 @@ Then listen to the desired events in your extension.
 
 Example:
 ```javascript
-var siphon = nodecg.extensions['lfg-siphon'];
-siphon.on('subscription', function (data) {
+const siphon = nodecg.extensions['lfg-siphon'];
+siphon.on('subscription', data => {
     console.log(data);
 });
 ```

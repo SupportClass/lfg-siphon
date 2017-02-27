@@ -93,6 +93,21 @@ module.exports = function (nodecg) {
 		self.emit('subscription', data);
 	});
 
+	let lastCheer;
+	socket.on('cheer', data => {
+		if (channels.indexOf(data.channel) < 0) {
+			return;
+		}
+
+		if (equal(lastCheer, data)) {
+			return;
+		}
+
+		lastCheer = data;
+		nodecg.sendMessage('cheer', data);
+		self.emit('cheer', data);
+	});
+
 	let heartbeatTimeout = setTimeout(heartbeat, 5000);
 	let heartbeatResponseTimeout;
 	let lastHeartbeatInterval = 5000;
