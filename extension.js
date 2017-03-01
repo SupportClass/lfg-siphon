@@ -7,6 +7,7 @@ module.exports = function (nodecg) {
 	const socket = require('socket.io-client')(nodecg.bundleConfig.streen.url);
 	const self = new EventEmitter();
 	const channels = nodecg.bundleConfig.channels;
+	const topCheers = nodecg.Replicant('topCheers');
 
 	nodecg.listenFor('getChannels', (data, cb) => cb(channels));
 
@@ -94,18 +95,28 @@ module.exports = function (nodecg) {
 	});
 
 	let lastCheer;
-	socket.on('cheer', data => {
-		if (channels.indexOf(data.channel) < 0) {
+	socket.on('cheer', cheer => {
+		if (channels.indexOf(cheer.channel) < 0) {
 			return;
 		}
 
-		if (equal(lastCheer, data)) {
+		const newTops = compareTops(cheer, topCheers.value);
+		let top = null;
+		Object.keys(newTops).forEach(period => {
+			if (newTops[period] !== null) {
+				topCheers.value[period] = newTops[period];
+				top = top ? top : period; // Don't touch top if it's already set
+			}
+		});
+		cheer.top = top;
+
+		if (equal(lastCheer, cheer)) {
 			return;
 		}
 
-		lastCheer = data;
-		nodecg.sendMessage('cheer', data);
-		self.emit('cheer', data);
+		lastCheer = cheer;
+		nodecg.sendMessage('cheer', cheer);
+		self.emit('cheer', cheer);
 	});
 
 	let heartbeatTimeout = setTimeout(heartbeat, 5000);
@@ -158,6 +169,24 @@ module.exports = function (nodecg) {
 			}
 		});
 	};
+
+	self.resetPeriod = function (period) {
+		topCheers.value[period] = {};
+	};
+
+	nodecg.listenFor('resetPeriod', self.resetPeriod);
+
+	function compareTops(cheer, tops) {
+		const ret = {monthly: null, daily: null};
+
+		Object.keys(tops).forEach(period => {
+			if (!tops[period].amount || cheer.amount > tops[period].amount) {
+				ret[period] = cheer;
+			}
+		});
+
+		return ret;
+	}
 
 	return self;
 };

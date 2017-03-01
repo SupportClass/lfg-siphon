@@ -1,0 +1,32 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+
+	"definitions": {
+		"top": {
+			"type": "object",
+			"properties": {
+				"amount": {
+					"type": "number",
+					"default": 0
+				},
+				"username": {
+					"type": "string",
+					"default": ""
+				}
+			},
+			"required": ["amount", "username"]
+		}
+	},
+
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"daily": {
+			"$ref": "#/definitions/top"
+		},
+		"monthly": {
+			"$ref": "#/definitions/top"
+		}
+	},
+	"required": ["daily", "monthly"]
+}
