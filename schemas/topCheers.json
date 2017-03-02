@@ -2,19 +2,29 @@
 	"$schema": "http://json-schema.org/draft-04/schema#",
 
 	"definitions": {
-		"top": {
-			"type": "object",
+		"cheer": {
+			"type": ["object", "null"],
 			"properties": {
-				"amount": {
-					"type": "number",
-					"default": 0
+				"channel": {
+					"type": "string"
 				},
-				"username": {
-					"type": "string",
-					"default": ""
+				"message": {
+					"type": "string"
+				},
+				"userstate": {
+					"type": "object",
+					"properties": {
+						"bits": {
+							"type": "number"
+						},
+						"display-name": {
+							"type": "string"
+						}
+					},
+					"required": ["bits", "display-name"]
 				}
 			},
-			"required": ["amount", "username"]
+			"required": ["channel", "message", "userstate"]
 		}
 	},
 
@@ -22,10 +32,10 @@
 	"additionalProperties": false,
 	"properties": {
 		"daily": {
-			"$ref": "#/definitions/top"
+			"$ref": "#/definitions/cheer"
 		},
 		"monthly": {
-			"$ref": "#/definitions/top"
+			"$ref": "#/definitions/cheer"
 		}
 	},
 	"required": ["daily", "monthly"]

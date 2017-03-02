@@ -183,7 +183,7 @@ module.exports = function (nodecg) {
 		const ret = {monthly: null, daily: null};
 
 		Object.keys(tops).forEach(period => {
-			if (!tops[period].amount || cheer.amount > tops[period].amount) {
+			if (!tops[period] || cheer.userstate.bits > tops[period].userstate.bits) {
 				ret[period] = cheer;
 			}
 		});
