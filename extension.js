@@ -80,7 +80,7 @@ module.exports = function (nodecg) {
 	});
 
 	let lastSub;
-	socket.on('subscrtiption', data => {
+	socket.on('subscription', data => {
 		if (channels.indexOf(data.channel) < 0) {
 			return;
 		}
