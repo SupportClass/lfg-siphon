@@ -1,38 +1,71 @@
 #lfg-siphon [![Build Status](https://travis-ci.org/SupportClass/lfg-siphon.svg?branch=master)](https://travis-ci.org/SupportClass/lfg-siphon)
 This is a [NodeCG](http://github.com/nodecg/nodecg) bundle.
 
-This bundle is an interface to [Streen](https://github.com/SupportClass/streen), an IPC wrapper for 
+This bundle is an interface to [Streen](https://github.com/SupportClass/streen), a centralized WebSocket wrapper for 
 [tmi.js](https://github.com/Schmoopiie/tmi.js). 
-Together, Streen and lfg-siphon enable one single tmi.js instance to power multiple NodeCG instances.
-
-lfg-siphon also provides a custom `twitch-chat` Polymer component which other bundles can easily include in their views
-to get embedded Twitch Chat.
+Together, Streen and lfg-siphon enable one single tmi.js instance to power multiple NodeCG instances across many servers,
+containers, etc.
 
 This bundle integrates with [`lfg-nucleus`](https://github.com/SupportClass/lfg-nucleus).
 
 ## Installation
 - Install to `nodecg/bundles/lfg-siphon`
 - Create `nodecg/cfg/lfg-siphon.json` with a list of Twitch chat channels to listen to.
-- To conserve resources, lfg-siphon will not emits events for normal chat messages by default.
- To enable, set `chat` to `true`.
+- Configure a connection to your instance of [Streen](https://github.com/SupportClass/streen) in `nodecg/cfg/lfg-siphon.json`.
 
 ### Config Example
 ```json
 {
-  "channels": ["dansgaming", "giantwaffle", "professorbroman"],
-  "chat": true
+	"channels": ["dansgaming", "giantwaffle", "professorbroman"],
+	"streen": {
+		"url": "https://your-streen-deployment.herokuapp.com/",
+		"secretKey": "your_super_secret_streen_key"
+	}
 }
 ```
 
-Additionally, there are optional properties `subPort` and `rpcPort`. These default to the same values as Streen.
+## Usage
+### As a dashboard panel
+If you simply want a list of recent subs on your dashboard, you are done.
 
-## methods
-From an extension:
-``` js
-var siphon = nodecg.extensions['lfg-siphon'];
+### In other bundles' view pages and dashboard panels
+If you would like to use this data in another bundle, add listen for the desired events in your view/panel.
+
+Example:
+```javascript
+nodecg.listenFor('subscription', 'lfg-siphon', data => {
+    console.log(data);
+});
+
+nodecg.listenFor('cheer', 'lfg-siphon', data => {
+    console.log(data);
+});
 ```
 
-### siphon.say(channel, message)
+### In other bundles' extensions
+If you want to use chat events in another bundle's extension,
+add `lfg-siphon` as a `bundleDependency` in your bundle's [`nodecg.json`](https://github.com/nodecg/nodecg/wiki/nodecg.json)
+Then listen to the desired events in your extension.
+
+Example:
+```javascript
+const siphon = nodecg.extensions['lfg-siphon'];
+siphon.on('subscription', data => {
+    console.log(data);
+});
+
+siphon.on('cheer', data => {
+    console.log(data);
+});
+```
+
+## API
+From an extension _only_ (will not work in graphics or dashboard panels):
+``` js
+const siphon = nodecg.extensions['lfg-siphon'];
+```
+
+#### siphon.say(channel, message)
 Send a message to a chat channel.
 See the corresponding tmi.js docs for more info ([link](http://www.tmijs.org/docs/Commands.md#say)).
 
@@ -40,7 +73,6 @@ See the corresponding tmi.js docs for more info ([link](http://www.tmijs.org/doc
 Times out a user on a channel for the given number of seconds.
 See the corresponding tmi.js docs for more info ([link](http://www.tmijs.org/docs/Commands.html#timeout)).
 
-## Events
 ### siphon.on('connect', function () {})
 When connected to Streen.
 
@@ -69,56 +101,13 @@ data.ts       // Unix timestamp (in milliseconds)
 ```
 
 ### siphon.on('cheer', function (data) {})
-Emitted on both subscriptions and sub anniversaries (resubs). `data` has the following properties:
+Emitted when a user sends a Cheer to a channel that this instance of lfg-siphon is listening to. 
+`data` has the following properties:
 ```js
 data.channel   // What channel this Cheer occurred in
 data.userstate // An object containing many details about this Cheer. `userstate.bits` will tell you the amount of bits cheered.
 data.message   // The message, if any, that accompanied the cheer.
 data.ts        // Unix timestamp (in milliseconds)
-```
-
-## Usage
-### As a dashboard panel
-If you simply want a list of recent subs on your dashboard, you are done.
-
-### In other bundles' view pages and dashboard panels
-If you would like to use this data in another bundle, add listen for the desired events in your view/panel.
-
-Example:
-```javascript
-nodecg.listenFor('subscription', 'lfg-siphon', data => {
-    console.log(data);
-});
-```
-
-To add a Twitch Chat embed, import the custom element and add an instance of it to your HTML:
-```html
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    
-    <!-- Import the custom twitch-chat element from lfg-siphon -->
-    <link rel="import" href="/view/lfg-siphon/twitch-chat.html">
-</head>
-<body>
-    <!-- Add an instance of it to the DOM -->
-    <twitch-chat channel="langeh"></twitch-chat>
-</body>
-</html>
-```
-
-### In other bundles' extensions
-If you want to use chat events in another bundle's extension,
-add `lfg-siphon` as a `bundleDependency` in your bundle's [`nodecg.json`](https://github.com/nodecg/nodecg/wiki/nodecg.json)
-Then listen to the desired events in your extension.
-
-Example:
-```javascript
-const siphon = nodecg.extensions['lfg-siphon'];
-siphon.on('subscription', data => {
-    console.log(data);
-});
 ```
 
 ## Special Thanks

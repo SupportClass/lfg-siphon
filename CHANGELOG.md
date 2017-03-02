@@ -1,3 +1,19 @@
+<a name="0.5.0"></a>
+# [0.5.0](https://github.com/SupportClass/lfg-siphon/compare/v0.4.1...v0.5.0) (2017-03-02)
+
+
+### Bug Fixes
+
+* improve error logging ([32dee14](https://github.com/SupportClass/lfg-siphon/commit/32dee14))
+
+
+### Features
+
+* **cheers:** add support for Cheers ([457f694](https://github.com/SupportClass/lfg-siphon/commit/457f694))
+* **cheers:** track top daily and monthly cheers via "topCheers" replicant ([3c540f3](https://github.com/SupportClass/lfg-siphon/commit/3c540f3))
+
+
+
 <a name="0.4.1"></a>
 ## [0.4.1](https://github.com/SupportClass/lfg-siphon/compare/v0.4.0...v0.4.1) (2017-02-01)
 
