@@ -110,6 +110,9 @@ module.exports = function (nodecg) {
 		});
 		cheer.top = top;
 
+		// These come as a string for some reason???
+		cheer.userstate.bits = parseInt(cheer.userstate.bits, 10);
+
 		if (equal(lastCheer, cheer)) {
 			return;
 		}
