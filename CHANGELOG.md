@@ -1,3 +1,13 @@
+<a name="0.5.1"></a>
+## [0.5.1](https://github.com/SupportClass/lfg-siphon/compare/v0.5.0...v0.5.1) (2017-03-04)
+
+
+### Bug Fixes
+
+* **tops:** fix top Cheer tracking not actually working whatsoever! ([a843bfc](https://github.com/SupportClass/lfg-siphon/commit/a843bfc))
+
+
+
 <a name="0.5.0"></a>
 # [0.5.0](https://github.com/SupportClass/lfg-siphon/compare/v0.4.1...v0.5.0) (2017-03-02)
 
