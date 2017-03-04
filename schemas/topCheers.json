@@ -28,14 +28,75 @@
 		}
 	},
 
+	"default": {
+		"monthly": {
+			"channel": "none",
+			"message": "",
+			"userstate": {
+				"bits": 0,
+				"display-name": "N/A"
+			}
+		},
+		"daily": {
+			"channel": "none",
+			"message": "",
+			"userstate": {
+				"bits": 0,
+				"display-name": "N/A"
+			}
+		}
+	},
+
 	"type": "object",
 	"additionalProperties": false,
 	"properties": {
 		"daily": {
-			"$ref": "#/definitions/cheer"
+			"type": "object",
+			"properties": {
+				"channel": {
+					"type": "string"
+				},
+				"message": {
+					"type": "string"
+				},
+				"userstate": {
+					"type": "object",
+					"properties": {
+						"bits": {
+							"type": "number"
+						},
+						"display-name": {
+							"type": "string"
+						}
+					},
+					"required": ["bits", "display-name"]
+				}
+			},
+			"required": ["channel", "message", "userstate"]
 		},
 		"monthly": {
-			"$ref": "#/definitions/cheer"
+			"type": "object",
+			"properties": {
+				"channel": {
+					"type": "string"
+				},
+				"message": {
+					"type": "string"
+				},
+				"userstate": {
+					"type": "object",
+					"properties": {
+						"bits": {
+							"type": "number"
+						},
+						"display-name": {
+							"type": "string"
+						}
+					},
+					"required": ["bits", "display-name"]
+				}
+			},
+			"required": ["channel", "message", "userstate"]
 		}
 	},
 	"required": ["daily", "monthly"]

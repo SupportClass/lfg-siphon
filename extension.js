@@ -1,7 +1,17 @@
 'use strict';
 
-const EventEmitter = require('events').EventEmitter;
+const DEFAULT_CHEER = {
+	channel: 'none',
+	message: '',
+	userstate: {
+		bits: 0,
+		'display-name': 'N/A'
+	}
+};
+
+const EventEmitter = require('events');
 const equal = require('deep-equal');
+const clone = require('clone');
 
 module.exports = function (nodecg) {
 	const socket = require('socket.io-client')(nodecg.bundleConfig.streen.url);
@@ -100,6 +110,10 @@ module.exports = function (nodecg) {
 			return;
 		}
 
+		// These come as a string for some reason???
+		// Also: very important that this conversion happens _before_ we compareTops!
+		cheer.userstate.bits = parseInt(cheer.userstate.bits, 10);
+
 		const newTops = compareTops(cheer, topCheers.value);
 		let top = null;
 		Object.keys(newTops).forEach(period => {
@@ -109,9 +123,6 @@ module.exports = function (nodecg) {
 			}
 		});
 		cheer.top = top;
-
-		// These come as a string for some reason???
-		cheer.userstate.bits = parseInt(cheer.userstate.bits, 10);
 
 		if (equal(lastCheer, cheer)) {
 			return;
@@ -174,16 +185,16 @@ module.exports = function (nodecg) {
 	};
 
 	self.resetPeriod = function (period) {
-		topCheers.value[period] = {};
+		topCheers.value[period] = clone(DEFAULT_CHEER);
 	};
 
 	nodecg.listenFor('resetPeriod', self.resetPeriod);
 
 	function compareTops(cheer, tops) {
-		const ret = {monthly: null, daily: null};
+		const ret = clone(tops);
 
 		Object.keys(tops).forEach(period => {
-			if (!tops[period] || cheer.userstate.bits > tops[period].userstate.bits) {
+			if (!tops[period] || !tops[period].userstate || cheer.userstate.bits > tops[period].userstate.bits) {
 				ret[period] = cheer;
 			}
 		});
