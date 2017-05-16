@@ -118,8 +118,13 @@ module.exports = function (nodecg) {
 		let top = null;
 		Object.keys(newTops).forEach(period => {
 			if (newTops[period] !== null) {
-				topCheers.value[period] = newTops[period];
-				top = top ? top : period; // Don't touch top if it's already set
+				try {
+					topCheers.value[period] = newTops[period];
+					top = top ? top : period; // Don't touch top if it's already set
+				} catch (e) {
+					nodecg.log.error('Failed to assign top cheer for period "%s", cheer object: %o\n Error:',
+						period, newTops[period], e);
+				}
 			}
 		});
 		cheer.top = top;
