@@ -156,13 +156,13 @@ module.exports = function (nodecg) {
 		self.emit('subgift', subgift);
 	});
 
-	socket.on('hosted', host => {
-		if (channels.indexOf(host.channel) < 0) {
+	socket.on('raided', raid => {
+		if (channels.indexOf(raid.channel) < 0) {
 			return;
 		}
 
-		nodecg.emit('hosted', host);
-		self.emit('hosted', host);
+		nodecg.emit('raided', raid);
+		self.emit('raided', raid);
 	});
 
 	let heartbeatTimeout = setTimeout(heartbeat, 5000);
