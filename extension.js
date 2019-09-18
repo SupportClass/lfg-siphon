@@ -143,7 +143,7 @@ module.exports = function (nodecg) {
 			return;
 		}
 
-		nodecg.emit('submysterygift', mysterygift);
+		nodecg.sendMessage('submysterygift', mysterygift);
 		self.emit('submysterygift', mysterygift);
 	});
 
@@ -152,7 +152,7 @@ module.exports = function (nodecg) {
 			return;
 		}
 
-		nodecg.emit('subgift', subgift);
+		nodecg.sendMessage('subgift', subgift);
 		self.emit('subgift', subgift);
 	});
 
@@ -161,7 +161,7 @@ module.exports = function (nodecg) {
 			return;
 		}
 
-		nodecg.emit('raided', raid);
+		nodecg.sendMessage('raided', raid);
 		self.emit('raided', raid);
 	});
 
