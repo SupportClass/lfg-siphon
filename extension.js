@@ -138,6 +138,33 @@ module.exports = function (nodecg) {
 		self.emit('cheer', cheer);
 	});
 
+	socket.on('submysterygift', mysterygift => {
+		if (channels.indexOf(mysterygift.channel) < 0) {
+			return;
+		}
+
+		nodecg.sendMessage('submysterygift', mysterygift);
+		self.emit('submysterygift', mysterygift);
+	});
+
+	socket.on('subgift', subgift => {
+		if (channels.indexOf(subgift.channel) < 0) {
+			return;
+		}
+
+		nodecg.sendMessage('subgift', subgift);
+		self.emit('subgift', subgift);
+	});
+
+	socket.on('raided', raid => {
+		if (channels.indexOf(raid.channel) < 0) {
+			return;
+		}
+
+		nodecg.sendMessage('raided', raid);
+		self.emit('raided', raid);
+	});
+
 	let heartbeatTimeout = setTimeout(heartbeat, 5000);
 	let heartbeatResponseTimeout;
 	let lastHeartbeatInterval = 5000;
